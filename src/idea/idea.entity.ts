@@ -3,7 +3,7 @@ import {
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from 'typeorm';
 
 @Entity('idea')
@@ -23,6 +23,8 @@ export class IdeaEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Column('boolean')
+  @Column('boolean', {
+    default: false
+  })
   isDeleted: boolean;
 }
