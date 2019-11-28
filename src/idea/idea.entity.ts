@@ -9,7 +9,7 @@ import {
 @Entity('idea')
 export class IdeaEntity {
   @PrimaryGeneratedColumn('uuid')
-  id: number;
+  id: string;
 
   @Column('text')
   name: string;
@@ -22,9 +22,4 @@ export class IdeaEntity {
 
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @Column('boolean', {
-    default: false
-  })
-  isDeleted: boolean;
 }
