@@ -16,9 +16,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus
       ? exception.getStatus()
       : HttpStatus.INTERNAL_SERVER_ERROR;
-    console.error('//////////////////////////////////////////////////');
-    console.error(exception);
-    console.error('//////////////////////////////////////////////////');
 
     const errorResponse = {
       code: status,
