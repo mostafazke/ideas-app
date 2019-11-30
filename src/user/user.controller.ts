@@ -1,7 +1,8 @@
-import { Controller, Post, Get, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, Delete, Param } from '@nestjs/common';
 import { UserService } from './user.service';
 import { LoginUserDTO, RegisterUserDTO, GetUserDTO } from './dto';
 import { AuthGuard } from 'src/shared/guards/auth.guard';
+import { DeleteResult } from 'typeorm';
 
 @Controller()
 export class UserController {
@@ -21,5 +22,10 @@ export class UserController {
   @Post('register')
   register(@Body() data: RegisterUserDTO): Promise<GetUserDTO> {
     return this._userService.register(data);
+  }
+
+  @Delete('user/:id')
+  deleteUser(@Param() id: string): Promise<DeleteResult> {
+    return this._userService.delete(id);
   }
 }
