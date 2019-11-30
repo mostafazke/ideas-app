@@ -5,7 +5,9 @@ import {
   UpdateDateColumn,
   Column,
   BeforeInsert,
-  OneToMany
+  OneToMany,
+  ManyToMany,
+  JoinTable
 } from 'typeorm';
 import { hash, compare } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
@@ -38,6 +40,10 @@ export class UserEntity {
   )
   ideas: IdeaEntity[];
 
+  @ManyToMany(type => IdeaEntity, { cascade: true })
+  @JoinTable()
+  bookmarks: IdeaEntity[];
+
   @BeforeInsert()
   async hashPassword() {
     this.password = await hash(this.password, 10);
@@ -53,6 +59,10 @@ export class UserEntity {
 
     if (this.ideas) {
       response.ideas = this.ideas;
+    }
+
+    if (this.bookmarks) {
+      response.bookmarks = this.bookmarks;
     }
 
     return response;

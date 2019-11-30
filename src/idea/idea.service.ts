@@ -4,6 +4,7 @@ import { IdeaEntity } from './idea.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateIdeaDto, UpdateIdeaDto, GetIdeaDTO } from './dto';
 import { UserEntity } from 'src/user/user.entity';
+import { GetUserDTO } from 'src/user/dto';
 
 @Injectable()
 export class IdeaService {
@@ -15,11 +16,20 @@ export class IdeaService {
   ) {}
 
   private toResponseObject(idea: IdeaEntity) {
-    return { ...idea, author: idea.author.toResponseObj() };
+    const res: any = { ...idea, author: idea.author.toResponseObj() };
+    if (res.upvotes) {
+      res.upvotes = idea.upvotes.length;
+    }
+    if (res.downvotes) {
+      res.downvotes = idea.downvotes.length;
+    }
+    return res;
   }
 
   async readAll(): Promise<GetIdeaDTO[]> {
-    const ideas = await this._ideaRepository.find({ relations: ['author'] });
+    const ideas = await this._ideaRepository.find({
+      relations: ['author', 'upvotes', 'downvotes']
+    });
     return ideas.map(idea => this.toResponseObject(idea));
   }
 
@@ -78,5 +88,45 @@ export class IdeaService {
       throw new HttpException('Not Authorized', HttpStatus.UNAUTHORIZED);
     }
     return await this._ideaRepository.delete(id);
+  }
+
+  async bookmark(id: string, userId: string): Promise<GetUserDTO> {
+    const idea = await this._ideaRepository.findOne(id);
+    if (!idea) {
+      throw new HttpException('The idea is not exists', HttpStatus.NOT_FOUND);
+    }
+    const user = await this._userRepository.findOne(userId, {
+      relations: ['bookmarks']
+    });
+
+    if (user.bookmarks.filter(bookmark => bookmark.id === idea.id).length) {
+      throw new HttpException(
+        'The idea is already bookmarked',
+        HttpStatus.BAD_REQUEST
+      );
+    }
+    user.bookmarks.push(idea);
+    await this._userRepository.save(user);
+    return user.toResponseObj();
+  }
+
+  async unBookmark(id: string, userId: string): Promise<GetUserDTO> {
+    const idea = await this._ideaRepository.findOne(id);
+    if (!idea) {
+      throw new HttpException('The idea is not exists', HttpStatus.NOT_FOUND);
+    }
+    const user = await this._userRepository.findOne(userId, {
+      relations: ['bookmarks']
+    });
+
+    if (!user.bookmarks.filter(bookmark => bookmark.id === idea.id).length) {
+      throw new HttpException(
+        'The idea is not bookmarked',
+        HttpStatus.BAD_REQUEST
+      );
+    }
+    user.bookmarks = user.bookmarks.filter(mark => mark.id !== idea.id);
+    await this._userRepository.save(user);
+    return user.toResponseObj();
   }
 }

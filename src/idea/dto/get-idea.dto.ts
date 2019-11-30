@@ -7,4 +7,6 @@ export class GetIdeaDTO {
   createdAt: Date;
   updatedAt: Date;
   author: GetUserDTO;
+  upvotes?: number;
+  downvotes?: number;
 }

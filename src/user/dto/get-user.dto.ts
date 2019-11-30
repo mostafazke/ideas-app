@@ -7,4 +7,5 @@ export class GetUserDTO {
   updatedAt: Date;
   token?: string;
   ideas?: IdeaEntity[];
+  bookmarks?: IdeaEntity[];
 }

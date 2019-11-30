@@ -4,6 +4,7 @@ import { Repository, DeleteResult } from 'typeorm';
 
 import { UserEntity } from './user.entity';
 import { LoginUserDTO, RegisterUserDTO, GetUserDTO } from './dto';
+import { IdeaEntity } from 'src/idea/idea.entity';
 
 @Injectable()
 export class UserService {
@@ -13,7 +14,9 @@ export class UserService {
   ) {}
 
   async getAll(): Promise<GetUserDTO[]> {
-    const users = await this._userRepository.find({relations: ['ideas']});
+    const users = await this._userRepository.find({
+      relations: ['ideas', 'bookmarks']
+    });
     return users.map(user => user.toResponseObj());
   }
 
@@ -61,5 +64,13 @@ export class UserService {
     }
 
     return await this._userRepository.delete(id);
+  }
+
+  async getAllBookmarks(id: string): Promise<IdeaEntity[]> {
+    const user = await this._userRepository.findOne(id, {
+      relations: ['ideas', 'bookmarks']
+    });
+    return user.bookmarks;
+    // return users.map(user => user.toResponseObj());
   }
 }
