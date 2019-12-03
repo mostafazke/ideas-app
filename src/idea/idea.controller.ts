@@ -71,4 +71,18 @@ export class IdeaController {
     this.helper.logData(id, userId);
     return this._ideaService.unBookmark(id, userId);
   }
+
+  @Post(':id/upvote')
+  @UseGuards(new AuthGuard())
+  upvote(@Param('id') id: string, @User('id') userId: string) {
+    this.helper.logData(id, userId);
+    return this._ideaService.upvote(id, userId);
+  }
+
+  @Post(':id/downvote')
+  @UseGuards(new AuthGuard())
+  downvote(@Param('id') id: string, @User('id') userId: string) {
+    this.helper.logData(id, userId);
+    return this._ideaService.downvote(id, userId);
+  }
 }

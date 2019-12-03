@@ -129,4 +129,17 @@ export class IdeaService {
     await this._userRepository.save(user);
     return user.toResponseObj();
   }
+
+  async upvote(id: string, userId: string) {
+    const idea = await this._ideaRepository.findOne(id);
+    if (!idea) {
+      throw new HttpException('The idea is not exists', HttpStatus.NOT_FOUND);
+    }
+  }
+  async downvote(id: string, userId: string) {
+    const idea = await this._ideaRepository.findOne(id);
+    if (!idea) {
+      throw new HttpException('The idea is not exists', HttpStatus.NOT_FOUND);
+    }
+  }
 }
