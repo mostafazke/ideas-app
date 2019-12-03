@@ -6,9 +6,10 @@ import { IdeaModule } from './idea/idea.module';
 import { Connection } from 'typeorm';
 import { SharedModule } from './shared/shared.module';
 import { UserModule } from './user/user.module';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(), IdeaModule, SharedModule, UserModule],
+  imports: [TypeOrmModule.forRoot(), IdeaModule, SharedModule, UserModule, CommentModule],
   controllers: [AppController],
   providers: [AppService],
 })
