@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateIdeaDto, UpdateIdeaDto, GetIdeaDTO } from './dto';
 import { UserEntity } from 'src/user/user.entity';
 import { GetUserDTO } from 'src/user/dto';
+import { Votes } from 'src/shared/votes.enum';
 
 @Injectable()
 export class IdeaService {
@@ -26,6 +27,24 @@ export class IdeaService {
     return res;
   }
 
+  private async vote(idea: IdeaEntity, user: UserEntity, vote: Votes) {
+    const oppsite = vote === Votes.UP ? Votes.DOWN : Votes.UP;
+    if (
+      idea[oppsite].filter(voter => voter.id === user.id).length ||
+      idea[vote].filter(voter => voter.id === user.id).length
+    ) {
+      idea[oppsite] = idea[oppsite].filter(voter => voter.id !== user.id);
+      idea[vote] = idea[vote].filter(voter => voter.id !== user.id);
+      await this._ideaRepository.save(idea);
+    } else if (!idea[vote].filter(voter => voter.id === user.id).length) {
+      idea[vote].push(user);
+      await this._ideaRepository.save(idea);
+    } else {
+      throw new HttpException('Unable to cast vote', HttpStatus.BAD_REQUEST);
+    }
+    return idea;
+  }
+
   async readAll(): Promise<GetIdeaDTO[]> {
     const ideas = await this._ideaRepository.find({
       relations: ['author', 'upvotes', 'downvotes']
@@ -45,7 +64,7 @@ export class IdeaService {
 
   async readByID(id: string): Promise<GetIdeaDTO> {
     const idea = await this._ideaRepository.findOne(id, {
-      relations: ['author']
+      relations: ['author', 'upvotes', 'downvotes']
     });
     if (!idea) {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);
@@ -130,16 +149,26 @@ export class IdeaService {
     return user.toResponseObj();
   }
 
-  async upvote(id: string, userId: string) {
-    const idea = await this._ideaRepository.findOne(id);
+  async upvote(id: string, userId: string): Promise<IdeaEntity> {
+    let idea = await this._ideaRepository.findOne(id, {
+      relations: ['author', 'upvotes', 'downvotes']
+    });
     if (!idea) {
       throw new HttpException('The idea is not exists', HttpStatus.NOT_FOUND);
     }
+    const user = await this._userRepository.findOne(userId);
+    idea = await this.vote(idea, user, Votes.UP);
+    return this.toResponseObject(idea);
   }
-  async downvote(id: string, userId: string) {
-    const idea = await this._ideaRepository.findOne(id);
+  async downvote(id: string, userId: string): Promise<IdeaEntity> {
+    let idea = await this._ideaRepository.findOne(id, {
+      relations: ['author', 'upvotes', 'downvotes']
+    });
     if (!idea) {
       throw new HttpException('The idea is not exists', HttpStatus.NOT_FOUND);
     }
+    const user = await this._userRepository.findOne(userId);
+    idea = await this.vote(idea, user, Votes.DOWN);
+    return this.toResponseObject(idea);
   }
 }
