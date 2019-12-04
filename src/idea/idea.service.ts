@@ -47,7 +47,7 @@ export class IdeaService {
 
   async readAll(): Promise<GetIdeaDTO[]> {
     const ideas = await this._ideaRepository.find({
-      relations: ['author', 'upvotes', 'downvotes']
+      relations: ['author', 'upvotes', 'downvotes', 'comments']
     });
     return ideas.map(idea => this.toResponseObject(idea));
   }
@@ -64,7 +64,7 @@ export class IdeaService {
 
   async readByID(id: string): Promise<GetIdeaDTO> {
     const idea = await this._ideaRepository.findOne(id, {
-      relations: ['author', 'upvotes', 'downvotes']
+      relations: ['author', 'upvotes', 'downvotes', 'comments']
     });
     if (!idea) {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);

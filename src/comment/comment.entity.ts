@@ -15,7 +15,7 @@ export class CommentEntity {
   @PrimaryGeneratedColumn('uuid') id: string;
   @CreateDateColumn() createdAt: Date;
   @UpdateDateColumn() updatedAt: Date;
-  @Column('text') coment: string;
+  @Column('text') comment: string;
 
   @ManyToOne(type => UserEntity)
   @JoinTable()

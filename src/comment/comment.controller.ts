@@ -11,20 +11,24 @@ import {
 import { CommentService } from './comment.service';
 import { AuthGuard } from 'src/shared/guards/auth.guard';
 import { User } from 'src/shared/decorators/user.decorator';
-import { CreateCommentDTO } from './dto';
+import { CreateCommentDTO, UpdateCommentDTO } from './dto';
 
 @Controller('comment')
 export class CommentController {
   constructor(private _commentService: CommentService) {}
 
   @Get('idea/:id')
-  getCommnetByIdea(@Param('id') ideaId: string) {}
+  getCommnetByIdea(@Param('id') ideaId: string) {
+    return this._commentService.getCommnetsByIdea(ideaId);
+  }
 
   @Get('user/:id')
   getCommnetByUser(@Param('id') userId: string) {}
 
   @Get(':id')
-  getCommnetById(@Param('id') id: string) {}
+  getCommnetById(@Param('id') id: string) {
+    return this._commentService.getCommnetById(id);
+  }
 
   @Post('idea/:id')
   @UseGuards(new AuthGuard())
@@ -32,17 +36,23 @@ export class CommentController {
     @Param('id') ideaId: string,
     @User('id') userId: string,
     @Body() commentObj: CreateCommentDTO
-  ) {}
+  ) {
+    return this._commentService.createComment(ideaId, userId, commentObj);
+  }
 
-  @Put('idea/:id')
+  @Put(':id')
   @UseGuards(new AuthGuard())
   updateComment(
-    @Param('id') ideaId: string,
+    @Param('id') id: string,
     @User('id') userId: string,
-    @Body() commentObj: CreateCommentDTO
-  ) {}
+    @Body() commentObj: UpdateCommentDTO
+  ) {
+    return this._commentService.updateComment(id, userId, commentObj);
+  }
 
   @Delete(':id')
   @UseGuards(new AuthGuard())
-  deleteComment(@Param('id') id: string, @User('id') userId: string) {}
+  deleteComment(@Param('id') id: string, @User('id') userId: string) {
+    return this._commentService.deleteComment(id, userId);
+  }
 }
