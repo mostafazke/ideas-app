@@ -16,35 +16,42 @@ export class CommentService {
     @InjectRepository(UserEntity)
     private _userRepository: Repository<UserEntity>
   ) {}
+  private toResponseObject(comment: CommentEntity) {
+    const res: any = comment;
 
-  async getCommnetById(id: string): Promise<CommentEntity> {
-    const commnet = await this._commentRepository.findOne(id, {
+    if (res.author) {
+      res.author = comment.author.toResponseObj();
+    }
+    return res;
+  }
+  async getCommentById(id: string): Promise<CommentEntity> {
+    const comment = await this._commentRepository.findOne(id, {
       relations: ['author', 'idea']
     });
-    if (!commnet) {
-      throw new HttpException('Commnet not found', HttpStatus.NOT_FOUND);
+    if (!comment) {
+      throw new HttpException('comment not found', HttpStatus.NOT_FOUND);
     }
-    // commnet.author = commnet.author.toResponseObj();
-    return commnet;
+
+    return this.toResponseObject(comment);
   }
 
-  async getCommnetsByIdea(ideaId: string): Promise<CommentEntity[]> {
+  async getCommentsByIdea(ideaId: string): Promise<CommentEntity[]> {
     const idea = await this._ideaRepository.findOne(ideaId, {
-      relations: ['comments']
+      relations: ['comments', 'comments.author']
     });
     if (!idea) {
       throw new HttpException('Idea not found', HttpStatus.NOT_FOUND);
     }
-    return idea.comments;
+    return idea.comments.map(comment => this.toResponseObject(comment));
   }
 
-  async getCommnetByUser(userId: string): Promise<CommentEntity[]> {
+  async getCommentByUser(userId: string): Promise<CommentEntity[]> {
     const comments = await this._commentRepository.find({
       where: { author: { id: userId } },
-      relations: ['author']
+      relations: ['idea']
     });
 
-    return comments;
+    return comments.map(comment => this.toResponseObject(comment));
   }
 
   async createComment(
@@ -54,9 +61,12 @@ export class CommentService {
   ): Promise<CommentEntity> {
     const idea = await this._ideaRepository.findOne(ideaId);
     const user = await this._userRepository.findOne(userId);
-    if (!idea) throw new HttpException('Idea not found', HttpStatus.NOT_FOUND);
-    if (!user)
+    if (!idea) {
+      throw new HttpException('Idea not found', HttpStatus.NOT_FOUND);
+    }
+    if (!user) {
       throw new HttpException('Author not found', HttpStatus.NOT_FOUND);
+    }
     const comment = this._commentRepository.create({
       ...commentObj,
       idea,
@@ -85,11 +95,12 @@ export class CommentService {
       ...comment,
       ...commentObj
     };
-    return await this._commentRepository.save(comment);
+    await this._commentRepository.save(comment);
+    return this.toResponseObject(comment);
   }
 
   async deleteComment(id: string, userId: string): Promise<DeleteResult> {
-    let comment = await this._commentRepository.findOne(id, {
+    const comment = await this._commentRepository.findOne(id, {
       relations: ['author', 'idea']
     });
     if (!comment) {

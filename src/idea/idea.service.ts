@@ -24,6 +24,13 @@ export class IdeaService {
     if (res.downvotes) {
       res.downvotes = idea.downvotes.length;
     }
+    if (res.comments) {
+      res.comments.map(comment =>
+        comment.author
+          ? (comment.author = comment.author.toResponseObj())
+          : comment
+      );
+    }
     return res;
   }
 
@@ -47,7 +54,13 @@ export class IdeaService {
 
   async readAll(): Promise<GetIdeaDTO[]> {
     const ideas = await this._ideaRepository.find({
-      relations: ['author', 'upvotes', 'downvotes', 'comments']
+      relations: [
+        'author',
+        'upvotes',
+        'downvotes',
+        'comments',
+        'comments.author'
+      ]
     });
     return ideas.map(idea => this.toResponseObject(idea));
   }
@@ -64,7 +77,13 @@ export class IdeaService {
 
   async readByID(id: string): Promise<GetIdeaDTO> {
     const idea = await this._ideaRepository.findOne(id, {
-      relations: ['author', 'upvotes', 'downvotes', 'comments']
+      relations: [
+        'author',
+        'upvotes',
+        'downvotes',
+        'comments',
+        'comments.author'
+      ]
     });
     if (!idea) {
       throw new HttpException('Not found', HttpStatus.NOT_FOUND);

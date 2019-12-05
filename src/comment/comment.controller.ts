@@ -17,20 +17,19 @@ import { CreateCommentDTO, UpdateCommentDTO } from './dto';
 export class CommentController {
   constructor(private _commentService: CommentService) {}
 
-  @Get()
-  @UseGuards(new AuthGuard())
-  getCommnetByUser(@User('id') userId: string) {
-    return this._commentService.getCommnetByUser(userId);
+  @Get('author/:id')
+  getCommentByUser(@Param('id') userId: string) {
+    return this._commentService.getCommentByUser(userId);
   }
 
   @Get('idea/:id')
-  getCommnetByIdea(@Param('id') ideaId: string) {
-    return this._commentService.getCommnetsByIdea(ideaId);
+  getCommentByIdea(@Param('id') ideaId: string) {
+    return this._commentService.getCommentsByIdea(ideaId);
   }
 
   @Get(':id')
-  getCommnetById(@Param('id') id: string) {
-    return this._commentService.getCommnetById(id);
+  getCommentById(@Param('id') id: string) {
+    return this._commentService.getCommentById(id);
   }
 
   @Post('idea/:id')
