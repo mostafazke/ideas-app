@@ -24,6 +24,7 @@ export class CommentService {
     if (!commnet) {
       throw new HttpException('Commnet not found', HttpStatus.NOT_FOUND);
     }
+    // commnet.author = commnet.author.toResponseObj();
     return commnet;
   }
 
@@ -37,15 +38,14 @@ export class CommentService {
     return idea.comments;
   }
 
-  // async getCommnetByUser(userId: string): Promise<CommentEntity[]> {
-  //   const user = await this._userRepository.findOne(userId, {
-  //     relations: ['comment']
-  //   });
-  //   if (!user) {
-  //     throw new HttpException('Author not found', HttpStatus.NOT_FOUND);
-  //   }
-  //   return user;
-  // }
+  async getCommnetByUser(userId: string): Promise<CommentEntity[]> {
+    const comments = await this._commentRepository.find({
+      where: { author: { id: userId } },
+      relations: ['author']
+    });
+
+    return comments;
+  }
 
   async createComment(
     ideaId: string,
@@ -71,7 +71,7 @@ export class CommentService {
     commentObj: UpdateCommentDTO
   ): Promise<CommentEntity> {
     let comment = await this._commentRepository.findOne(id, {
-      relations: ['author']
+      relations: ['author', 'idea']
     });
 
     if (!comment) {
@@ -90,7 +90,7 @@ export class CommentService {
 
   async deleteComment(id: string, userId: string): Promise<DeleteResult> {
     let comment = await this._commentRepository.findOne(id, {
-      relations: ['author']
+      relations: ['author', 'idea']
     });
     if (!comment) {
       throw new HttpException('Comment not found', HttpStatus.NOT_FOUND);

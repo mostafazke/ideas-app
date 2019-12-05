@@ -13,6 +13,7 @@ import { hash, compare } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
 import { GetUserDTO } from './dto';
 import { IdeaEntity } from 'src/idea/idea.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity('user')
 export class UserEntity {
@@ -32,6 +33,7 @@ export class UserEntity {
   username: string;
 
   @Column('text')
+  @Exclude()
   password: string;
 
   @OneToMany(
