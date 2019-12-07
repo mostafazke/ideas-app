@@ -5,7 +5,8 @@ import {
   Body,
   UseGuards,
   Delete,
-  Param
+  Param,
+  Query
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { LoginUserDTO, RegisterUserDTO, GetUserDTO } from './dto';
@@ -13,7 +14,9 @@ import { AuthGuard } from 'src/shared/guards/auth.guard';
 import { DeleteResult } from 'typeorm';
 import { Helper } from 'src/shared/helper';
 import { User } from 'src/shared/decorators/user.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('user')
 @Controller()
 export class UserController {
   helper = Helper.getInstance();
@@ -21,8 +24,12 @@ export class UserController {
 
   @Get('user')
   @UseGuards(new AuthGuard())
-  getAll(): Promise<GetUserDTO[]> {
-    return this._userService.getAll();
+  getAll(
+    @Query('page') page,
+    @Query('size') size,
+    @Query('search') search
+  ): Promise<GetUserDTO[]> {
+    return this._userService.getAll(page, size, search);
   }
 
   @Post('login')

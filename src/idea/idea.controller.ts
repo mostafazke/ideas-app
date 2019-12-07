@@ -16,6 +16,9 @@ import { User } from 'src/shared/decorators/user.decorator';
 import { Helper } from 'src/shared/helper';
 import { IdeaEntity } from './idea.entity';
 import { GetUserDTO } from 'src/user/dto';
+import { ApiTags } from '@nestjs/swagger';
+
+@ApiTags('idea')
 @Controller('idea')
 export class IdeaController {
   helper = Helper.getInstance();

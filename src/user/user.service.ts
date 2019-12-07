@@ -1,6 +1,6 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DeleteResult } from 'typeorm';
+import { Repository, DeleteResult, Like } from 'typeorm';
 
 import { UserEntity } from './user.entity';
 import { LoginUserDTO, RegisterUserDTO, GetUserDTO } from './dto';
@@ -13,8 +13,16 @@ export class UserService {
     private _userRepository: Repository<UserEntity>
   ) {}
 
-  async getAll(): Promise<GetUserDTO[]> {
-    const users = await this._userRepository.find({
+  async getAll(
+    page: number = 1,
+    size: number = 10,
+    search: string = ''
+  ): Promise<GetUserDTO[]> {
+    const [users, count] = await this._userRepository.findAndCount({
+      where: { username: Like('%' + search.toLowerCase() + '%') },
+      order: { username: 'DESC' },
+      take: size,
+      skip: page,
       relations: ['ideas', 'bookmarks']
     });
     return users.map(user => user.toResponseObj());
